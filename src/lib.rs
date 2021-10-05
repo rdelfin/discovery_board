@@ -6,9 +6,14 @@ pub use panic_itm; // panic handler
 
 pub use cortex_m_rt::entry;
 
-pub use stm32f3_discovery::{leds::Leds, stm32f3xx_hal, switch_hal};
-pub use switch_hal::{ActiveHigh, OutputSwitch, Switch, ToggleableOutputSwitch};
-
+// Need stm32f3xx_hal::prelude::* otherwise
+//   'Error(corex-m-rt): The interrupt vectors are missing`
+pub use cortex_m::{asm::bkpt, iprint, iprintln, peripheral::ITM};
+pub use stm32f3_discovery::{
+    leds::Leds,
+    stm32f3xx_hal::{self, prelude::*},
+    switch_hal,
+};
 use stm32f3xx_hal::prelude::*;
 pub use stm32f3xx_hal::{
     delay::Delay,
@@ -16,10 +21,11 @@ pub use stm32f3xx_hal::{
     hal::blocking::delay::DelayMs,
     pac,
 };
+pub use switch_hal::{ActiveHigh, OutputSwitch, Switch, ToggleableOutputSwitch};
 
 pub type LedArray = [Switch<gpioe::PEx<Output<PushPull>>, ActiveHigh>; 8];
 
-pub fn init() -> (Delay, LedArray) {
+pub fn led_init() -> (Delay, LedArray) {
     let device_periphs = pac::Peripherals::take().unwrap();
     let mut reset_and_clock_control = device_periphs.RCC.constrain();
 
@@ -44,4 +50,10 @@ pub fn init() -> (Delay, LedArray) {
     );
 
     (delay, leds.into_array())
+}
+
+pub fn itm_init() -> ITM {
+    let p = cortex_m::Peripherals::take().unwrap();
+
+    p.ITM
 }

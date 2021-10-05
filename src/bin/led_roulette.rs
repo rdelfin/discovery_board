@@ -7,7 +7,7 @@ use volatile::Volatile;
 
 #[entry]
 fn main() -> ! {
-    let (mut delay, mut leds): (Delay, LedArray) = disc_aux::init();
+    let (mut delay, mut leds): (Delay, LedArray) = disc_aux::led_init();
 
     let mut half_period = 50_u16;
     let v_half_period = Volatile::new(&mut half_period);
