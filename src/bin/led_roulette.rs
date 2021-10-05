@@ -9,14 +9,21 @@ use volatile::Volatile;
 fn main() -> ! {
     let (mut delay, mut leds): (Delay, LedArray) = disc_aux::init();
 
-    let mut half_period = 500_u16;
+    let mut half_period = 50_u16;
     let v_half_period = Volatile::new(&mut half_period);
 
+    let led_order = [0, 1, 2, 3, 4, 5, 6, 7];
+    let mut idx = 0;
+
     loop {
-        leds[0].on().ok();
+        let next_idx = (idx + 1) % led_order.len();
+
+        leds[led_order[next_idx]].on().ok();
         delay.delay_ms(v_half_period.read());
 
-        leds[0].off().ok();
+        leds[led_order[idx]].off().ok();
         delay.delay_ms(v_half_period.read());
+
+        idx = next_idx;
     }
 }
