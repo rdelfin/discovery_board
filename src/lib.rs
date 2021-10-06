@@ -6,11 +6,15 @@ pub use panic_itm; // panic handler
 
 pub use cortex_m_rt::entry;
 
+use panic_itm as _; // panic handler
+
 // Need stm32f3xx_hal::prelude::* otherwise
 //   'Error(corex-m-rt): The interrupt vectors are missing`
 pub use cortex_m::{asm::bkpt, iprint, iprintln, peripheral::ITM};
+pub use stm32f3::stm32f303::{self, gpioc::RegisterBlock};
 pub use stm32f3_discovery::{
     leds::Leds,
+    stm32f3xx_hal::pac::GPIOE,
     stm32f3xx_hal::{self, prelude::*},
     switch_hal,
 };
@@ -19,7 +23,7 @@ pub use stm32f3xx_hal::{
     delay::Delay,
     gpio::{gpioe, Output, PushPull},
     hal::blocking::delay::DelayMs,
-    pac,
+    pac, stm32,
 };
 pub use switch_hal::{ActiveHigh, OutputSwitch, Switch, ToggleableOutputSwitch};
 
@@ -54,6 +58,27 @@ pub fn led_init() -> (Delay, LedArray) {
 
 pub fn itm_init() -> ITM {
     let p = cortex_m::Peripherals::take().unwrap();
-
     p.ITM
+}
+
+pub fn registers_init() -> &'static RegisterBlock {
+    let device_periphs = stm32::Peripherals::take().unwrap();
+    let mut reset_and_clock_control = device_periphs.RCC.constrain();
+
+    // initialize user leds
+    let mut gpioe = device_periphs.GPIOE.split(&mut reset_and_clock_control.ahb);
+    let _leds = Leds::new(
+        gpioe.pe8,
+        gpioe.pe9,
+        gpioe.pe10,
+        gpioe.pe11,
+        gpioe.pe12,
+        gpioe.pe13,
+        gpioe.pe14,
+        gpioe.pe15,
+        &mut gpioe.moder,
+        &mut gpioe.otyper,
+    );
+
+    unsafe { &*stm32f303::GPIOE::ptr() }
 }
