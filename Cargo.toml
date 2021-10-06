@@ -12,6 +12,9 @@ name = "registers"
 [[bin]]
 name = "spooky"
 
+[[bin]]
+name = "safe_registers"
+
 [lib]
 name = "disc_aux"
 path = "src/lib.rs"
