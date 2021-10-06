@@ -9,6 +9,9 @@ name = "led_roulette"
 [[bin]]
 name = "registers"
 
+[[bin]]
+name = "spooky"
+
 [lib]
 name = "disc_aux"
 path = "src/lib.rs"
